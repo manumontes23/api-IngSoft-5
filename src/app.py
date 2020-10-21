@@ -163,17 +163,17 @@ def getVar(fechaVar):
 #RUTAS JESSICA PARRA
   #GET
   #Ruta que retorna los clientes del riesgo de Mercado
-@app.route('/riesgoMercado/cliente')
+@app.route('/riesgoMercado/clientes')
 def rmListarClientes():
-    clientes = Clientes.query.all()
-    result = clientes_schema.dump(clientes)
-    return jsonify(result)
+    return jsonify({"mensaje":"Clientes de riesgo de Mercado","ListaRM":lista_riesgoMercado})
 
   #Ruta que retorna un cliente en especifico del riesgo de Mercado
-@app.route('/riesgoMercado/cliente/<id>')
+@app.route('/riesgoMercado/cliente/<string:id>')
 def rmListarClienteId(id):
-    cliente = Clientes.query.get(id)
-    return cliente_schema.jsonify(cliente)
+    cliente_encontrado = [cliente for cliente in lista_riesgoMercado if cliente['idCliente'] == id]
+    if(len(cliente_encontrado) > 0):
+        return jsonify( {"mensaje":"Cliente encontrado", id:cliente_encontrado} )        
+    return jsonify( {"mensaje":"Cliente no encontrado"} )  
     
 #RUTAS SANTIAGO JIMENEZ
 #GET
