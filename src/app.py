@@ -7,6 +7,14 @@ from sqlalchemy import Table, Column, Integer, String, MetaData
 from var import lista_var
 from riesgoMercado import lista_riesgoMercado
 
+
+# Testing Route
+@app.route('/ping', methods=['GET'])
+def ping():
+    return jsonify({'response': 'pong!'})
+
+
+#CON BASE DE DATOS
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@Localhost/test'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -50,7 +58,7 @@ class ClientesSchema(ma.Schema):
 cliente_schema = ClientesSchema()
 clientes_schema = ClientesSchema(many=True)
 
-#RUTAS
+#RUTAS CON BD
 ######################################
 #SANTIAGO JIMENEZ RAIGOSA
 ######################################
@@ -137,6 +145,8 @@ def varEliminarClientes(id):
   db.session.commit()
   return cliente_schema.jsonify(cliente)
 
+#RUTAS DANIEL LOPEZ
+#GET
 #Ruta que devuelve los var
 @app.route('/lstVar')
 def getListaVar():
@@ -151,7 +161,7 @@ def getVar(fechaVar):
     return jsonify( {"mensaje":"var_no_encontrado"} )  
   
 
-  #Jessica Parra
+#RUTAS JESSICA PARRA
   #GET
   #Ruta que retorna los clientes del riesgo de Mercado
 @app.route('/riesgoMercado/cliente')
@@ -165,7 +175,23 @@ def rmListarClientes():
 def rmListarClienteId(id):
     cliente = Clientes.query.get(id)
     return cliente_schema.jsonify(cliente)
+    
+#RUTAS SANTIAGO JIMENEZ
+#GET
+#Retorna los clientes del VaR
+@app.route('/lstVar')
+def getListaVar():
+  return jsonify({"mensaje":"Lista clientes del var","ListaVar":lista_var})
+
+#Retorna un cliente especifico que tenga el valor en riesgo
+@app.route('/var/<string:id>')
+def getProduct(id):
+  cliente_encontrado = [
+      cliente for cliente in lista_var if cliente['idCliente'] == id]
+  if (len(cliente_encontrado) > 0):
+      return jsonify({'información cliente': cliente_encontrado[0]})
+  return jsonify({'message': 'El cliente no existe'}) 
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+  app.run(debug=True)
