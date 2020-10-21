@@ -148,6 +148,22 @@ def getVar(fechaVar):
     if(len(var_encontrado) > 0):
         return jsonify( {"mensaje":"var_encontrado", fechaVar:var_encontrado} )        
     return jsonify( {"mensaje":"var_no_encontrado"} )  
+  
+
+  #Jessica Parra
+  #GET
+  #Ruta que retorna los clientes del riesgo de Mercado
+  @app.route('/riesgoMercado/cliente')
+  def rmListarClientes():
+  clientes = Clientes.query.all()
+  result = clientes_schema.dump(clientes)
+  return jsonify(result)
+
+  #Ruta que retorna un cliente en especifico del riesgo de Mercado
+  @app.route('/riesgoMercado/cliente/<id>')
+  def rmListarClienteId(id):
+  cliente = Clientes.query.get(id)
+  return cliente_schema.jsonify(cliente)
 
 
 if __name__ == "__main__":
