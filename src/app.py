@@ -5,6 +5,7 @@ from flask_marshmallow import Marshmallow
 from sqlalchemy import Table, Column, Integer, String, MetaData
 
 from var import lista_var
+from riesgoMercado import lista_riesgoMercado
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@Localhost/test'
