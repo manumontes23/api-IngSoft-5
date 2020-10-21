@@ -3,6 +3,9 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from sqlalchemy import Table, Column, Integer, String, MetaData
+
+from var import lista_var
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@Localhost/test'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -132,6 +135,19 @@ def varEliminarClientes(id):
   db.session.delete(cliente)
   db.session.commit()
   return cliente_schema.jsonify(cliente)
+
+#Ruta que devuelve los var
+@app.route('/lstVar')
+def getListaVar():
+    return jsonify({"mensaje":"Lista var","ListaVar":lista_var})
+
+#Ruta que devuelve los var
+@app.route('/var/<string:fechaVar>')
+def getVar(fechaVar):
+    var_encontrado = [var for var in lista_var if var['fecha'] == fechaVar ] 
+    if(len(var_encontrado) > 0):
+        return jsonify( {"mensaje":"var_encontrado", fechaVar:var_encontrado} )        
+    return jsonify( {"mensaje":"var_no_encontrado"} )  
 
 
 if __name__ == "__main__":
