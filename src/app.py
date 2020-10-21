@@ -191,6 +191,41 @@ def cliente_id(id):
       return jsonify({'informacion cliente': cliente_encontrado[0]})
   return jsonify({'message': 'El cliente no existe'}) 
 
+#Asociar un nuevo cliente para el VaR
+@app.route('/var/crear_cliente', methods=['POST'])
+def crear_cliente():
+    new_cliente = {
+        'idCliente': request.json['idCliente'],
+        'var': request.json['var'],
+        'fecha': request.json['fecha'],
+    }
+    lista_var.append(new_cliente)
+    return jsonify({'Se ha agregado el cliente': new_cliente})
+    
+#Actualiza un cliente para el VaR
+@app.route('/var/acutalizar_cliente/<string:id>', methods=['PUT'])
+def actualizar_cliente(id):
+    cliente_encontrado = [cliente for cliente in lista_var if cliente['idCliente'] == id]
+    if (len(cliente_encontrado) > 0):
+        cliente_encontrado[0]['idCliente'] = request.json['idCliente']
+        cliente_encontrado[0]['var'] = request.json['var']
+        cliente_encontrado[0]['fecha'] = request.json['fecha']
+        return jsonify({
+            'message': 'Cliente actualizado',
+            'Cliente': cliente_encontrado[0]
+        })
+    return jsonify({'message': 'El cliente no existe'})
+
+#Borra un cliente para un VaR
+@app.route('/var/eliminar_cliente/<string:id>', methods=['DELETE'])
+def eliminar_cliente(id):
+    cliente_encontrado = [cliente for cliente in lista_var if cliente['idCliente'] == id]
+    if len(cliente_encontrado) > 0:
+        lista_var.remove(cliente_encontrado[0])
+        return jsonify({
+            'message': 'Cliente eliminado',
+            'Cliente': cliente_encontrado
+        })
 
 if __name__ == "__main__":
   app.run(debug=True, port=4000)
