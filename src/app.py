@@ -1,21 +1,21 @@
   
 from flask import Flask, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
+""" from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
-from sqlalchemy import Table, Column, Integer, String, MetaData
+from sqlalchemy import Table, Column, Integer, String, MetaData """
 
 from var import lista_var
 from riesgoMercado import lista_riesgoMercado
 
-
+app = Flask(__name__)
 # Testing Route
 @app.route('/ping', methods=['GET'])
 def ping():
     return jsonify({'response': 'pong!'})
 
 
-#CON BASE DE DATOS
-app = Flask(__name__)
+""" #CON BASE DE DATOS
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@Localhost/test'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -144,9 +144,8 @@ def varEliminarClientes(id):
   db.session.delete(cliente)
   db.session.commit()
   return cliente_schema.jsonify(cliente)
-
+ """
 #RUTAS DANIEL LOPEZ
-#GET
 #Ruta que devuelve los var
 @app.route('/lstVar')
 def getListaVar():
@@ -179,17 +178,17 @@ def rmListarClienteId(id):
 #RUTAS SANTIAGO JIMENEZ
 #GET
 #Retorna los clientes del VaR
-@app.route('/lstVar')
-def getListaVar():
+@app.route('/var/clientes_var')
+def clientes_var():
   return jsonify({"mensaje":"Lista clientes del var","ListaVar":lista_var})
 
 #Retorna un cliente especifico que tenga el valor en riesgo
-@app.route('/var/<string:id>')
-def getProduct(id):
+@app.route('/var/cliente_var/id/<string:id>')
+def cliente_id(id):
   cliente_encontrado = [
       cliente for cliente in lista_var if cliente['idCliente'] == id]
   if (len(cliente_encontrado) > 0):
-      return jsonify({'información cliente': cliente_encontrado[0]})
+      return jsonify({'informacion cliente': cliente_encontrado[0]})
   return jsonify({'message': 'El cliente no existe'}) 
 
 
