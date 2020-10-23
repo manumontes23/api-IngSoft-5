@@ -1,8 +1,8 @@
   
 from flask import Flask, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
+""" from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
-from sqlalchemy import Table, Column, Integer, String, MetaData
+from sqlalchemy import Table, Column, Integer, String, MetaData """
 
 from var import lista_var
 from riesgoMercado import lista_riesgoMercado
@@ -14,9 +14,9 @@ def ping():
     return jsonify({'response': 'pong!'})
 
 
-""" #CON BASE DE DATOS"""
+""" #CON BASE DE DATOS
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'manumontes+Gatito99://manumontes23.mysql.pythonanywhere-services.com'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@Localhost/test'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -144,7 +144,7 @@ def varEliminarClientes(id):
   db.session.delete(cliente)
   db.session.commit()
   return cliente_schema.jsonify(cliente)
-
+ """
 #RUTAS DANIEL LOPEZ
 #Ruta que devuelve los var
 @app.route('/lstVar')
