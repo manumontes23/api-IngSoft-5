@@ -1,231 +1,35 @@
   
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from flask_marshmallow import Marshmallow
+#from flask_marshmallow import Marshmallow
 from sqlalchemy import Table, Column, Integer, String, MetaData
+from decouple import config as config_decouple
 
-from var import lista_var
-from riesgoMercado import lista_riesgoMercado
+def create_app(enviroment):
+    app = Flask(__name__)
 
-app = Flask(__name__)
+    app.config.from_object(enviroment)
+
+    with app.app_context():
+        db.init_app(app)
+        db.create_all()
+
+    return app
+
+enviroment = config['development']
+if config_decouple('PRODUCTION', default=False):
+    enviroment = config['production']
+
+app = create_app(enviroment)
+
 # Testing Route
 @app.route('/ping', methods=['GET'])
 def ping():
     return jsonify({'response': 'pong!'})
 
-
-""" #CON BASE DE DATOS"""
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'manumontes+Gatito99://manumontes23.mysql.pythonanywhere-services.com'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-db = SQLAlchemy(app)
-ma = Marshmallow(app)
-
-
-class Clientes(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    cedula = db.Column(db.String(50), unique=True)
-    nombre = db.Column(db.String(50), unique=True)
-    apellidos = db.Column(db.String(50), unique=True)
-    email = db.Column(db.String(50), unique=True)
-    celular = db.Column(db.String(50), unique=True)
-    fijo = db.Column(db.String(50), unique=True)
-    nit = db.Column(db.String(50), unique=True)
-    rut = db.Column(db.String(50), unique=True)
-    riesgo = db.Column(db.String(50), unique=True)
-    valor = db.Column(db.String(50), unique=True)
-
-    def __init__(self, cedula, nombre, apellidos, email, celular, fijo, nit, rut,riesgo,valor):
-        self.cedula = cedula  
-        self.nombre = nombre
-        self.apellidos = apellidos
-        self.email = email
-        self.celular = celular
-        self.fijo = fijo
-        self.nit = nit
-        self.rut = rut
-        self.riesgo = riesgo
-        self.valor = valor
-
-db.create_all()
-
-class ClientesSchema(ma.Schema):
-    class Meta:
-        fields = ('id', 'cedula', 'nombre', 'apellidos',
-                  'email', 'celular', 'fijo', 'nit', 'rut','riesgo','valor')
-
-cliente_schema = ClientesSchema()
-clientes_schema = ClientesSchema(many=True)
-
-#RUTAS CON BD
-######################################
-#SANTIAGO JIMENEZ RAIGOSA
-######################################
-
-##########
-#GET
-##########
-
-#Retorna los clientes del VaR
-@app.route('/var/nuevoCliente/<string:id_cliente>')
-def varVisualizarClientes():
-  clientes = Clientes.query.all()
-  result = clientes_schema.dump(clientes)
-  return jsonify(result)
-
-#Retorna un cliente especifico que tenga el valor en riesgo
-@app.route('/tasks/<id>', methods=['GET'])
-def varVisualizarClientesId(id):
-  cliente = Clientes.query.get(id)
-  return cliente_schema.jsonify(cliente)
-
-##########
-#POST
-##########
-#Crea un nuevo cliente para el VaR Asociar un cliente ya existente al var
-@app.route('/var/nuevoCliente', methods=['Post'])
-def varCrearClientes():
-
-    nuevo_cliente= Clientes(request.json['cedula'],
-                            request.json['nombre'],
-                            request.json['apellidos'],
-                            request.json['email'],
-                            request.json['celular'],
-                            request.json['fijo'],
-                            request.json['nit'],
-                            request.json['rut'],
-                            'var',
-                            request.json['valor'])
-    db.session.add(nuevo_cliente)
-    db.session.commit()
-    return cliente_schema.jsonify(nuevo_cliente)
-
-##########
-#PUT
-##########
-
-#Actualiza un cliente para el VaR
-@app.route('/tasks/<id>', methods=['PUT'])
-def varActualizarClientes(id):
-  cliente = Clientes.query.get(id)
-  cedula = request.json['cedula']
-  nombre = request.json['nombre']
-  apellidos = request.json['apellidos']
-  email = request.json['email']
-  celular = request.json['celular']
-  fijo = request.json['fijo']
-  nit = request.json['nit']
-  rut = request.json['rut']
-  riesgo = request.json['riesgo']
-  valor = request.json['valor']
-  cliente.cedula = cedula
-  cliente.nombre = nombre
-  cliente.apellidos = apellidos
-  cliente.email = email
-  cliente.celular = celular
-  cliente.fijo = fijo
-  cliente.nit = nit
-  cliente.rut = rut
-  cliente.riesgo = riesgo
-  cliente.valor = valor
-  db.session.commit()
-
-  return cliente_schema.jsonify(cliente)
-
-##########
-#DELETE
-##########
-
-#Borra un cliente especifico para el VaR
-@app.route('/tasks/<id>', methods=['DELETE'])
-def varEliminarClientes(id):
-  cliente = Clientes.query.get(id)
-  db.session.delete(cliente)
-  db.session.commit()
-  return cliente_schema.jsonify(cliente)
-
-#RUTAS DANIEL LOPEZ
-#Ruta que devuelve los var
-@app.route('/lstVar')
-def getListaVar():
-    return jsonify({"mensaje":"Lista var","ListaVar":lista_var})
-
-#Ruta que devuelve los var
-@app.route('/var/<string:fechaVar>')
-def getVar(fechaVar):
-    var_encontrado = [var for var in lista_var if var['fecha'] == fechaVar ] 
-    if(len(var_encontrado) > 0):
-        return jsonify( {"mensaje":"var_encontrado", fechaVar:var_encontrado} )        
-    return jsonify( {"mensaje":"var_no_encontrado"} )  
-  
-
-#RUTAS JESSICA PARRA
-  #GET
-  #Ruta que retorna los clientes del riesgo de Mercado
-@app.route('/riesgoMercado/clientes')
-def rmListarClientes():
-    return jsonify({"mensaje":"Clientes de riesgo de Mercado","ListaRM":lista_riesgoMercado})
-
-  #Ruta que retorna un cliente en especifico del riesgo de Mercado
-@app.route('/riesgoMercado/cliente/<string:id>')
-def rmListarClienteId(id):
-    cliente_encontrado = [cliente for cliente in lista_riesgoMercado if cliente['idCliente'] == id]
-    if(len(cliente_encontrado) > 0):
-        return jsonify( {"mensaje":"Cliente encontrado", id:cliente_encontrado} )        
-    return jsonify( {"mensaje":"Cliente no encontrado"} )  
-    
-#RUTAS SANTIAGO JIMENEZ
-#GET
-#Retorna los clientes del VaR
-@app.route('/var/clientes_var')
-def clientes_var():
-  return jsonify({"mensaje":"Lista clientes del var","ListaVar":lista_var})
-
-#Retorna un cliente especifico que tenga el valor en riesgo
-@app.route('/var/cliente_var/id/<string:id>')
-def cliente_id(id):
-  cliente_encontrado = [
-      cliente for cliente in lista_var if cliente['idCliente'] == id]
-  if (len(cliente_encontrado) > 0):
-      return jsonify({'informacion cliente': cliente_encontrado[0]})
-  return jsonify({'message': 'El cliente no existe'}) 
-
-#Asociar un nuevo cliente para el VaR
-@app.route('/var/crear_cliente', methods=['POST'])
-def crear_cliente():
-    new_cliente = {
-        'idCliente': request.json['idCliente'],
-        'var': request.json['var'],
-        'fecha': request.json['fecha'],
-    }
-    lista_var.append(new_cliente)
-    return jsonify({'Se ha agregado el cliente': new_cliente})
-    
-#Actualiza un cliente para el VaR
-@app.route('/var/acutalizar_cliente/<string:id>', methods=['PUT'])
-def actualizar_cliente(id):
-    cliente_encontrado = [cliente for cliente in lista_var if cliente['idCliente'] == id]
-    if (len(cliente_encontrado) > 0):
-        cliente_encontrado[0]['idCliente'] = request.json['idCliente']
-        cliente_encontrado[0]['var'] = request.json['var']
-        cliente_encontrado[0]['fecha'] = request.json['fecha']
-        return jsonify({
-            'message': 'Cliente actualizado',
-            'Cliente': cliente_encontrado[0]
-        })
-    return jsonify({'message': 'El cliente no existe'})
-
-#Borra un cliente para un VaR
-@app.route('/var/eliminar_cliente/<string:id>', methods=['DELETE'])
-def eliminar_cliente(id):
-    cliente_encontrado = [cliente for cliente in lista_var if cliente['idCliente'] == id]
-    if len(cliente_encontrado) > 0:
-        lista_var.remove(cliente_encontrado[0])
-        return jsonify({
-            'message': 'Cliente eliminado',
-            'Cliente': cliente_encontrado
-        })
+@app.route('/bdConnect',methods=['GET'])
+def bdConnect():
+    return jsonify({'response': 'pong!'})
 
 if __name__ == "__main__":
   app.run(debug=True, port=4000)
